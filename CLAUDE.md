@@ -8,14 +8,7 @@ AlephSkills is the official skill library for the Aleph project. Each skill is a
 
 ## Repository Structure
 
-Skills are organized into 4 tiers:
-
-- **foundation/** — Core development methodology (debug, test, code-review, git, refactor, search, shell, doc)
-- **workflow/** — Development lifecycle processes (plan, api-design, database, deploy, security, performance, ci-cd)
-- **specialist/** — Domain-specific expertise (architecture, emergency, regex, mcp-dev, knowledge)
-- **automation/** — CLI tool wrappers (github, playwright, http-client, data-pipeline, email, ssh, media-tools, notification, typeset, web-scraper)
-
-Each skill lives at `<tier>/<skill-name>/SKILL.md`.
+All 30 skills are flat at the repository root — each skill lives at `<skill-name>/SKILL.md`.
 
 ## Skill File Format
 

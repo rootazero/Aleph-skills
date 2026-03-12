@@ -14,55 +14,38 @@ Each skill is a self-contained `SKILL.md` file that can be invoked independently
 
 ## Skill Library
 
-### Foundation (Core Methodology)
-
 | Skill | Description |
 |-------|-------------|
-| **debug** | 7-step systematic debugging protocol with POE-aligned success contracts |
-| **test** | TDD cycles, framework detection, test patterns across languages |
-| **code-review** | Multi-dimensional review with confidence-based filtering (P0-P4) |
-| **git** | Daily operations, advanced techniques (bisect, reflog, worktree), commit conventions |
-| **refactor** | Smell detection, technique selection, test-protected incremental changes |
-| **search** | Code archaeology, documentation retrieval, web research strategies |
-| **shell** | System diagnostics, Docker operations, process and network management |
-| **doc** | 3-stage documentation co-authoring with templates (RFC, ADR, README, runbook) |
-
-### Workflow (Development Lifecycle)
-
-| Skill | Description |
-|-------|-------------|
-| **plan** | From ambiguous requirements to clear decisions with ADR documentation |
 | **api-design** | Contract-first REST/GraphQL design, error handling, versioning |
-| **database** | Selection decision tree, schema design, query optimization, migrations |
-| **deploy** | Containerization, release strategies, monitoring, rollback procedures |
-| **security** | OWASP checklist, credential leak response, dependency scanning |
-| **performance** | Measure-first profiling, optimization patterns by language |
-| **ci-cd** | GitHub Actions templates, caching strategies, pipeline patterns |
-
-### Specialist (Domain Expertise)
-
-| Skill | Description |
-|-------|-------------|
 | **architecture** | Pattern selection, dependency analysis, the Aleph 1-2-3-4 model |
+| **ci-cd** | GitHub Actions templates, caching strategies, pipeline patterns |
+| **code-review** | Multi-dimensional review with confidence-based filtering (P0-P4) |
+| **data-pipeline** | JSON/CSV transformation, filtering, aggregation (`jq` / `python3`) |
+| **database** | Selection decision tree, schema design, query optimization, migrations |
+| **debug** | 7-step systematic debugging protocol with POE-aligned success contracts |
+| **deploy** | Containerization, release strategies, monitoring, rollback procedures |
+| **doc** | 3-stage documentation co-authoring with templates (RFC, ADR, README, runbook) |
+| **email** | Send and receive emails, templates for notifications (`curl` SMTP/IMAP) |
 | **emergency** | Git disasters, disk full, DB locks, credential leaks, deployment failures |
-| **regex** | Validation, parsing, replacement patterns with language-specific usage |
-| **mcp-dev** | Agent-centric MCP server development, 4-phase workflow |
+| **git** | Daily operations, advanced techniques (bisect, reflog, worktree), commit conventions |
+| **github** | PR lifecycle, issue management, CI debugging, API queries (`gh`) |
+| **http-client** | API debugging, authentication patterns, response analysis (`curl`) |
 | **knowledge** | Insight extraction using the Rephrasing Test, N-count confidence system |
-
-### Automation (CLI Wrappers)
-
-| Skill | Tooling | Description |
-|-------|---------|-------------|
-| **github** | `gh` | PR lifecycle, issue management, CI debugging, API queries |
-| **playwright** | `npx playwright` | E2E testing, screenshots, form filling, data extraction |
-| **http-client** | `curl` | API debugging, authentication patterns, response analysis |
-| **data-pipeline** | `jq` / `python3` | JSON/CSV transformation, filtering, aggregation |
-| **email** | `curl` (SMTP/IMAP) | Send and receive emails, templates for notifications |
-| **ssh** | `ssh` / `rsync` | Connections, port forwarding, file transfer, key management |
-| **media-tools** | `ffmpeg` | Video/audio/image processing, format conversion |
-| **notification** | `osascript` / `curl` | macOS native, ntfy.sh, Telegram, webhooks |
-| **typeset** | `typst` | Document rendering to PDF, math, templates |
-| **web-scraper** | `curl` / `python3` | Structured data extraction, search, PDF download |
+| **mcp-dev** | Agent-centric MCP server development, 4-phase workflow |
+| **media-tools** | Video/audio/image processing, format conversion (`ffmpeg`) |
+| **notification** | macOS native, ntfy.sh, Telegram, webhooks (`osascript` / `curl`) |
+| **performance** | Measure-first profiling, optimization patterns by language |
+| **plan** | From ambiguous requirements to clear decisions with ADR documentation |
+| **playwright** | E2E testing, screenshots, form filling, data extraction (`npx playwright`) |
+| **refactor** | Smell detection, technique selection, test-protected incremental changes |
+| **regex** | Validation, parsing, replacement patterns with language-specific usage |
+| **search** | Code archaeology, documentation retrieval, web research strategies |
+| **security** | OWASP checklist, credential leak response, dependency scanning |
+| **shell** | System diagnostics, Docker operations, process and network management |
+| **ssh** | Connections, port forwarding, file transfer, key management (`ssh` / `rsync`) |
+| **test** | TDD cycles, framework detection, test patterns across languages |
+| **typeset** | Document rendering to PDF, math, templates (`typst`) |
+| **web-scraper** | Structured data extraction, search, PDF download (`curl` / `python3`) |
 
 ## Skill File Format
 
