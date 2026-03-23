@@ -77,16 +77,43 @@ and manage your own configuration and workspace.
 ## Secret Management (CRITICAL)
 
 API keys and credentials MUST be stored in the encrypted vault.
-NEVER write secrets to config files.
+NEVER write secrets to config files — the vault encrypts them at rest.
 
-- Store: vault_store(action="store", key="<convention>", secret="<value>")
-- Delete: vault_store(action="delete", key="<convention>")
-- List: vault_store(action="list")
+### How to store API keys
 
-Key naming conventions:
-- LLM providers: provider:{name} (e.g., provider:openai)
-- Generation providers: gen:{name} (e.g., gen:stability)
-- Channels: channel:{type}:{id} (e.g., channel:telegram:bot1)
+```
+vault_store(action="store", key="<convention>", secret="<api_key>")
+```
+
+### How to delete API keys
+
+```
+vault_store(action="delete", key="<convention>")
+```
+
+### How to list stored keys (names only, never values)
+
+```
+vault_store(action="list")
+```
+
+### Key naming conventions
+
+| Type | Convention | Example |
+|------|-----------|---------|
+| LLM providers | `provider:{name}` | `provider:openai`, `provider:claude` |
+| Generation providers | `gen:{name}` | `gen:stability`, `gen:t8star-video` |
+| Channels | `channel:{type}:{id}` | `channel:telegram:bot1` |
+| Embedding | `embedding:{name}` | `embedding:openai` |
+
+### Example: Add a new API key
+
+User says: "Add my OpenAI key sk-abc123"
+
+Steps:
+1. `vault_store(action="store", key="provider:openai", secret="sk-abc123")`
+2. Verify: `vault_store(action="list")` — should show `provider:openai`
+3. **NEVER** write `api_key = "sk-abc123"` in config.toml
 
 ## Detailed Guides
 
