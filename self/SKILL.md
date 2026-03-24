@@ -14,15 +14,18 @@ and manage your own configuration and workspace.
 
 ## ⚠️ Critical Rules (read before doing ANYTHING)
 
-### Allowed tools for self-management
-Only use these tools during configuration tasks:
-- `vault_store` — store/delete/list API keys in encrypted vault
+### Tool usage guidelines
+**Primary tools** (use for most config tasks):
+- `vault_store` — store/delete/list API keys
 - `bash` — read/write config files, run system commands
-- `read_config_guide` — load detailed guide for a specific domain
-- `self_manage` — re-enter self-management mode (already active)
+- `read_config_guide` — load detailed guide for a domain
 
-Do NOT use `web_fetch`, `search`, `file_ops`, `image_generate`, or any other tool
-during configuration. They waste token budget and are irrelevant.
+**Situational tools** (use only when the task requires it):
+- `web_fetch` / `search` — ONLY when installing plugins/skills that need external documentation, or when the user explicitly asks to look something up. Do NOT use for routine config changes like adding a provider or modifying settings.
+
+**Never use during self-management**:
+- `file_ops` — cannot access `~/.aleph/config.toml` (denied_paths), use `bash` instead
+- `image_generate`, `generate_video` — irrelevant to configuration
 
 ### Other critical rules
 1. **API keys are PII-filtered** — the user's message may have the API key replaced with `[REDACTED]`. If so, ask the user to send the key via vault_store tool directly.
