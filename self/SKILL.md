@@ -1,81 +1,45 @@
 ---
 name: Self-Management
-description: "Enter self-management mode — configure providers, agents, channels, skills, generation, and other system settings"
+description: "Aleph self-management mode — configure LLM providers, generation providers (image/video/speech/audio), channels (Telegram/Discord), agents, skills, plugins, MCP servers, and other system settings via config.toml and vault. Use when the user asks to add/modify/remove a provider, change settings, install a skill or plugin, configure a channel, manage API keys, or any task involving ~/.aleph/ configuration. Also triggered by explicit /self command."
 scope: system
 invocation:
   user_invocable: true
   disable_model_invocation: true
 ---
 
-# Aleph Self-Management Mode
+# Aleph Self-Management
 
-You are now in self-management mode. You have full access to read, modify,
-and manage your own configuration and workspace.
+## Critical Rules
 
-## ⚠️ Critical Rules (read before doing ANYTHING)
+1. **Use `bash` for config files** — `file_ops` cannot access `~/.aleph/config.toml` (denied_paths).
+2. **Store API key FIRST, then edit config** — `vault_store`, then `bash`. Never write keys to config files.
+3. **Copy exact TOML field names** — wrong field names silently fail. Refer to reference docs.
+4. **TOML section ordering** — subsections like `[generation.providers.X]` must appear after `[generation]` and before the next top-level section.
+5. **Generation providers need restart** — after adding/modifying, tell user to restart Aleph.
+6. **LLM providers default disabled** — always set `enabled = true` explicitly.
+7. **PII filtering** — if user's API key shows as `[REDACTED]`, ask them to use `vault_store` directly.
+8. **Kill before restart** — multiple aleph processes corrupt vault. See [config-editing.md](references/config-editing.md).
 
-### Tool usage guidelines
-**Primary tools** (use for most config tasks):
-- `vault_store` — store/delete/list API keys
-- `bash` — read/write config files, run system commands
-- `read_config_guide` — load detailed guide for a domain
+## Tools
 
-**Situational tools** (use only when the task requires it):
-- `web_fetch` / `search` — ONLY when installing plugins/skills that need external documentation, or when the user explicitly asks to look something up. Do NOT use for routine config changes like adding a provider or modifying settings.
+| Tool | Use for |
+|------|---------|
+| `vault_store` | Store/delete/list API keys |
+| `bash` | Read/write config files, run system commands |
+| `read_config_guide` | Load detailed guide for a domain (see topics below) |
+| `web_fetch` / `search` | Only for plugin/skill installs needing external docs |
 
-**Never use during self-management**:
-- `file_ops` — cannot access `~/.aleph/config.toml` (denied_paths), use `bash` instead
-- `image_generate`, `generate_video` — irrelevant to configuration
-
-### Other critical rules
-1. **API keys are PII-filtered** — the user's message may have the API key replaced with `[REDACTED]`. If so, ask the user to send the key via vault_store tool directly.
-2. **file_ops CANNOT access ~/.aleph/config.toml** — it's in denied_paths. Always use `bash` tool.
-3. **Store API key FIRST, then edit config** — vault_store, then bash. Never write keys to config files.
-4. **Copy the exact TOML templates below** — do NOT invent field names. Wrong field names silently fail.
-5. **TOML section ordering** — `[generation.providers.X]` must be BEFORE `[group_chat]`, `[tools]`, etc.
-
-## Workspace Structure: ~/.aleph/
-
-```
-~/.aleph/
-├── config.toml              # Main config (hot-reload via fswatch)
-├── soul.md                  # Global persona definition
-├── user_profile.md          # User profile (loaded per session)
-├── mcp_config.json          # MCP server definitions (mcp_manage to reload)
-│
-├── agents/{id}/             # Agent data directory
-│   ├── SOUL.md              # Persona (SoulManifest, YAML frontmatter)
-│   ├── IDENTITY.md          # Name, role, description
-│   ├── MEMORY.md            # Long-term memory (≤20K chars)
-│   ├── AGENTS.md            # Operating manual
-│   ├── TOOLS.md             # Tool configuration
-│   └── sessions/            # Session history
-│
-├── workspaces/{id}/         # Agent workspace (file output)
-│   ├── output/              # Generated files
-│   └── .tool_output/        # Tool temporary output
-│
-├── guides/                  # Config guides (read by read_config_guide tool)
-├── skills/                  # User custom skills
-├── skills-official/         # Official skills repo (auto-updated, read-only)
-├── plugins/                 # Plugin system
-├── data/                    # Persistent data (LanceDB, vault, sessions DB)
-├── logs/                    # Log files
-├── backups/                 # Config backups (timestamped)
-└── output/                  # Global default output directory
-```
+**Never use**: `file_ops` (denied_paths), `image_generate`, `generate_video`.
 
 ## Operation Protocol
 
-1. **Store secrets first**: vault_store for any API keys
-2. **Read config**: `bash(cat ~/.aleph/config.toml)` to understand current structure
-3. **Edit config**: `bash` with sed or python to insert/modify TOML sections
-4. **Verify**: `bash(cat ~/.aleph/config.toml | grep -A10 'section_name')` to check
-5. Config auto-reloads (fswatch 500ms) — no restart needed
+1. Store secrets: `vault_store(action="store", key="<convention>", secret="<key>")`
+2. Read config: `bash(cat ~/.aleph/config.toml)`
+3. Edit config: `bash` with python3 (safer than sed for TOML)
+4. Verify: `bash(grep -A10 'section_name' ~/.aleph/config.toml)`
+5. Config auto-reloads (fswatch 500ms) — no restart needed except generation providers.
 
 ## Secret Management
-
-API keys MUST be stored in the encrypted vault. NEVER write secrets to config files.
 
 ```
 vault_store(action="store", key="<convention>", secret="<api_key>")
@@ -90,14 +54,7 @@ vault_store(action="list")
 | Channels | `channel:{type}:{id}` | `channel:telegram:bot1` |
 | Embedding | `embedding:{name}` | `embedding:openai` |
 
-**PII warning**: If the user sends an API key in their message, Aleph's PII filter may
-replace it with `[REDACTED]` before you see it. If you see `[REDACTED]`, tell the user:
-"API key was filtered by security. Please use the vault_store tool directly or send the
-key in a separate message."
-
-## Detailed Guides
-
-For domain-specific details, call `read_config_guide(topic)`:
+## read_config_guide Topics
 
 | Topic | Covers |
 |-------|--------|
@@ -111,152 +68,29 @@ For domain-specific details, call `read_config_guide(topic)`:
 | general | Default provider, language, policies |
 | cron | Scheduled tasks |
 
-## Generation Provider Configuration
+## Workspace: ~/.aleph/
 
-### Supported provider_type values (EXACT — do not invent others)
-
-| Category | provider_type values |
-|----------|---------------------|
-| Image | `openai_image`, `dalle`, `stability`, `stability_image`, `sdxl`, `midjourney`, `mj`, `google_imagen`, `imagen`, `replicate` |
-| Video | `t8star_veo`, `google_veo`, `veo` |
-| Speech | `openai_tts`, `tts`, `elevenlabs` |
-| Audio | `openai_compat` |
-
-### TOML field reference (EXACT field names — do not use alternatives)
-
-| Correct field | WRONG alternatives (do NOT use) |
-|---------------|--------------------------------|
-| `provider_type = "t8star_veo"` | ~~provider = "..."~~, ~~type = "..."~~ |
-| `models = ["model-name"]` | ~~model = "..."~~ (must be array) |
-| `capabilities = ["video"]` | ~~type = "video"~~ (must be array) |
-| `base_url = "https://..."` | ~~url = "..."~~ |
-| `default_video_provider = "name"` | ~~default_video = "..."~~ |
-| `default_image_provider = "name"` | ~~default_image = "..."~~ |
-| `default_speech_provider = "name"` | ~~default_speech = "..."~~ |
-| `default_audio_provider = "name"` | ~~default_audio = "..."~~ |
-
-### Complete video provider template
-
-```toml
-[generation.providers.T8StarVideo]
-provider_type = "t8star_veo"
-base_url = "https://ai.t8star.cn/v2/videos/generations"
-models = ["veo3.1-pro-4k"]
-capabilities = ["video"]
-enabled = true
-timeout_seconds = 300
-color = "#808080"
+```
+~/.aleph/
+├── config.toml              # Main config (hot-reload)
+├── soul.md                  # Global persona
+├── user_profile.md          # User profile
+├── mcp_config.json          # MCP server definitions
+├── agents/{id}/             # Agent data (SOUL.md, MEMORY.md, sessions/)
+├── workspaces/{id}/output/  # Agent file output
+├── skills/                  # User custom skills
+├── skills-official/         # Official skills (read-only)
+├── plugins/                 # Installed plugins
+├── data/                    # LanceDB, vault, sessions DB
+└── output/                  # Global default output
 ```
 
-### Complete image provider template
+## Reference Docs
 
-```toml
-[generation.providers.openai-dalle]
-provider_type = "openai_image"
-base_url = "https://api.openai.com/v1"
-models = ["dall-e-3"]
-capabilities = ["image"]
-enabled = true
-timeout_seconds = 60
-color = "#808080"
-```
+Read the appropriate reference file when working on a specific domain:
 
-### Complete speech provider template
-
-```toml
-[generation.providers.openai-tts]
-provider_type = "openai_tts"
-base_url = "https://api.openai.com/v1"
-models = ["tts-1-hd"]
-capabilities = ["speech"]
-enabled = true
-timeout_seconds = 60
-color = "#808080"
-```
-
-### URL rules
-- **Standard URL** (base only, e.g., `https://api.openai.com/v1`): system auto-appends path
-- **Full URL** (e.g., `https://ai.t8star.cn/v2/videos/generations`): used as-is
-
-### Step-by-step: Add a generation provider
-
-Exact tool call sequence (minimize tool calls):
-
-**Step 1**: Store API key
-```
-vault_store(action="store", key="gen:<ProviderName>", secret="<api_key>")
-```
-
-**Step 2**: Read current config to find insertion point
-```
-bash(grep -n '^\[generation\]\|^\[group_chat\]\|^\[tools\]\|^\[mcp\]' ~/.aleph/config.toml)
-```
-
-**Step 3**: Insert provider config at correct position (before next top-level section)
-```
-bash(python3 -c "
-import re
-with open('$HOME/.aleph/config.toml', 'r') as f:
-    content = f.read()
-
-new_section = '''
-[generation.providers.<NAME>]
-provider_type = \"<TYPE>\"
-base_url = \"<URL>\"
-models = [\"<MODEL>\"]
-capabilities = [\"<CAPABILITY>\"]
-enabled = true
-timeout_seconds = 300
-color = \"#808080\"
-'''
-
-# Insert before [group_chat] or [tools] or [mcp] — whichever comes first after [generation]
-import re
-pattern = r'(\[(?:group_chat|tools|mcp)\])'
-match = re.search(pattern, content)
-if match:
-    pos = match.start()
-    content = content[:pos] + new_section + '\n' + content[pos:]
-else:
-    content += new_section
-
-with open('$HOME/.aleph/config.toml', 'w') as f:
-    f.write(content)
-print('Done')
-")
-```
-
-**Step 4**: Set default and verify
-```
-bash(grep -A8 '<NAME>' ~/.aleph/config.toml)
-```
-
-Total: 4 tool calls. Do NOT add unnecessary steps.
-
-## LLM Provider Configuration
-
-### Complete LLM provider template
-
-```toml
-[providers.MyProvider]
-protocol = "openai"
-base_url = "https://api.example.com/v1"
-models = ["model-name"]
-enabled = true
-verified = false
-timeout_seconds = 300
-color = "#808080"
-```
-
-- `protocol`: `"openai"` (for any OpenAI-compatible API including OpenRouter, DMX), `"anthropic"`, `"gemini"`, `"ollama"`
-- Store key: `vault_store(action="store", key="provider:<name>", secret="<key>")`
-
-## Config File Editing Rules
-
-1. **Generation providers need restart** — config.toml hot-reload updates the Config struct, but generation provider instances are only registered at startup. After adding/modifying a generation provider, tell the user: "Please restart Aleph for the new generation provider to take effect."
-2. **Always use `bash` tool** — `file_ops` cannot access `~/.aleph/config.toml` (protected path)
-2. **TOML section ordering matters**: subsections like `[generation.providers.X]` must appear
-   after their parent `[generation]` and before the next top-level section
-3. **Use python3 for complex edits** — safer than sed for TOML manipulation
-4. **Verify after edit**: grep the modified section to confirm
-5. **Config auto-reloads**: no restart needed (fswatch 500ms debounce)
+- **[LLM Providers](references/llm-providers.md)** — protocols, presets, base_url rules, full template, field pitfalls. Read when adding/modifying an LLM provider in `[providers.*]`.
+- **[Generation Providers](references/generation-providers.md)** — provider_type values, ResolvedUrl rules, templates, defaults block, typed maps. Read when adding/modifying image/video/speech/audio providers in `[generation.*]`.
+- **[Channels](references/channels.md)** — Telegram, Discord TOML templates and all fields. Read when configuring a channel in `[channels.*]`.
+- **[Extensions](references/extensions.md)** — plugin CLI commands, skill format, MCP .mcp.json, installation and errors. Read when installing/managing plugins, skills, or MCP servers.
+- **[Config Editing](references/config-editing.md)** — TOML editing rules, section order, process management. Read when performing complex config edits or restarting Aleph.
