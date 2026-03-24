@@ -124,9 +124,13 @@ For domain-specific details, call `read_config_guide(topic)`:
 | Correct field | WRONG alternatives (do NOT use) |
 |---------------|--------------------------------|
 | `provider_type = "t8star_veo"` | ~~provider = "..."~~, ~~type = "..."~~ |
-| `models = ["model-name"]` | ~~model = "..."~~ |
-| `capabilities = ["video"]` | ~~type = "video"~~ |
+| `models = ["model-name"]` | ~~model = "..."~~ (must be array) |
+| `capabilities = ["video"]` | ~~type = "video"~~ (must be array) |
 | `base_url = "https://..."` | ~~url = "..."~~ |
+| `default_video_provider = "name"` | ~~default_video = "..."~~ |
+| `default_image_provider = "name"` | ~~default_image = "..."~~ |
+| `default_speech_provider = "name"` | ~~default_speech = "..."~~ |
+| `default_audio_provider = "name"` | ~~default_audio = "..."~~ |
 
 ### Complete video provider template
 
