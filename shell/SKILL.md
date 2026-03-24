@@ -1,14 +1,9 @@
 ---
 name: shell
-description: Scene-driven shell commands — system diagnostics, Docker operations, process management
-scope: standalone
+description: "Scene-driven shell commands — system diagnostics, Docker operations, and process management. Use for system administration: checking ports, managing processes, Docker containers, disk cleanup, network debugging, or any sysadmin task."
 ---
 
 # Shell & Containers
-
-## When to Use
-
-Invoke this skill for system administration tasks: checking ports, managing processes, Docker containers, disk cleanup, and network debugging.
 
 ## Port & Process Diagnostics
 

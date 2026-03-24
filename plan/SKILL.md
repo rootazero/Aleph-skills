@@ -1,14 +1,9 @@
 ---
 name: plan
-description: Technical design — from ambiguous requirements to clear decisions with ADR documentation
-scope: standalone
+description: "Technical design — from ambiguous requirements to clear decisions with ADR documentation. Use when starting a new feature, making architectural decisions, choosing between implementation approaches, or producing decision records and implementation plans."
 ---
 
 # Technical Design
-
-## When to Use
-
-Invoke this skill when starting a new feature, making architectural decisions, or needing to choose between multiple implementation approaches. It produces a decision record and implementation plan.
 
 ## The Design Workflow
 

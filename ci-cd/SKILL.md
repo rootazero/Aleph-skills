@@ -1,14 +1,9 @@
 ---
 name: ci-cd
-description: CI/CD pipeline design — GitHub Actions templates, caching, secrets, pipeline patterns
-scope: standalone
+description: "CI/CD pipeline design — GitHub Actions templates, caching strategies, secret management, and pipeline patterns (fan-out, matrix, conditional deploy). Use when setting up continuous integration, continuous deployment, automating build/test/deploy workflows, or debugging CI failures."
 ---
 
 # CI/CD Pipelines
-
-## When to Use
-
-Invoke this skill when setting up continuous integration, continuous deployment, or automating build/test/deploy workflows.
 
 ## GitHub Actions Fundamentals
 

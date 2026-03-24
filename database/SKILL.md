@@ -1,14 +1,9 @@
 ---
 name: database
-description: Database design — selection decision tree, schema design, query optimization, migrations
-scope: standalone
+description: "Database design — selection decision tree, schema design, query optimization, and migrations. Use when choosing a database, designing schemas, optimizing queries, planning migrations, or establishing indexing strategies."
 ---
 
 # Database Design
-
-## When to Use
-
-Invoke this skill when choosing a database, designing schemas, optimizing queries, or planning migrations.
 
 ## Database Selection
 

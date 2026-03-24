@@ -1,10 +1,6 @@
 ---
-name: Self-Management
+name: self
 description: "Aleph self-management mode — configure LLM providers, generation providers (image/video/speech/audio), channels (Telegram/Discord), agents, skills, plugins, MCP servers, and other system settings via config.toml and vault. Use when the user asks to add/modify/remove a provider, change settings, install a skill or plugin, configure a channel, manage API keys, or any task involving ~/.aleph/ configuration. Also triggered by explicit /self command."
-scope: system
-invocation:
-  user_invocable: true
-  disable_model_invocation: true
 ---
 
 # Aleph Self-Management

@@ -1,14 +1,9 @@
 ---
 name: git
-description: Git workflow — daily operations, advanced techniques, and Aleph conventions
-scope: standalone
+description: "Git workflow — daily operations, advanced techniques, and Aleph conventions. Use for any Git operation: committing, branching, merging, recovering from mistakes, bisect, reflog, worktrees, or following Aleph commit conventions."
 ---
 
 # Git Workflow
-
-## When to Use
-
-Invoke this skill for any Git operation — committing, branching, merging, recovering from mistakes, or working with advanced features like bisect, reflog, and worktrees.
 
 ## Commit Convention
 

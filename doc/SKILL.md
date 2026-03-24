@@ -1,14 +1,9 @@
 ---
 name: doc
-description: Documentation co-authoring — 3-stage workflow with templates for RFC, ADR, README, and specs
-scope: standalone
+description: "Documentation co-authoring — 3-stage workflow with templates for RFC, ADR, README, and specs. Use when writing documentation: READMEs, RFCs, ADRs, design docs, API docs, runbooks, or any structured technical document."
 ---
 
 # Documentation Writing
-
-## When to Use
-
-Invoke this skill when writing documentation — READMEs, RFCs, ADRs, design docs, API docs, runbooks, or any structured technical document.
 
 ## The 3-Stage Process
 

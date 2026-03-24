@@ -1,14 +1,9 @@
 ---
 name: knowledge
-description: Knowledge distillation — extract core insights using the Rephrasing Test, compress for retention
-scope: standalone
+description: "Knowledge distillation — extract core insights using the Rephrasing Test, compress for retention. Use when extracting key insights from long documents, code reviews, meeting notes, research papers, or any content that needs to be compressed to its essentials."
 ---
 
 # Knowledge Distillation
-
-## When to Use
-
-Invoke this skill when extracting key insights from long documents, code reviews, meeting notes, research papers, or any content that needs to be compressed to its essentials.
 
 ## The Rephrasing Test
 

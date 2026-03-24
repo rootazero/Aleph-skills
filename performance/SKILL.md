@@ -1,14 +1,9 @@
 ---
 name: performance
-description: Performance optimization — measure first, profile, optimize with evidence
-scope: standalone
+description: "Performance optimization — measure first, profile, optimize with evidence. Use when diagnosing slow performance, profiling applications, optimizing critical paths, reducing latency, or improving throughput. Always measure before optimizing."
 ---
 
 # Performance Optimization
-
-## When to Use
-
-Invoke this skill when diagnosing slow performance, profiling applications, or optimizing critical paths. Always measure before optimizing.
 
 ## The Cardinal Rule
 

@@ -1,14 +1,9 @@
 ---
 name: search
-description: Technical search strategies — code archaeology, documentation retrieval, web research
-scope: standalone
+description: "Technical search strategies — code archaeology, documentation retrieval, and web research. Use when finding definitions in code, locating library documentation, answering technical questions, or understanding how existing code works."
 ---
 
 # Technical Search
-
-## When to Use
-
-Invoke this skill when you need to find information — definitions in code, documentation for a library, answers to technical questions, or understanding how existing code works.
 
 ## Search Mode Selection
 

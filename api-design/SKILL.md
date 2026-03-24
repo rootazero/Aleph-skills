@@ -1,14 +1,9 @@
 ---
 name: api-design
-description: Contract-first API design — REST and GraphQL conventions, error handling, versioning
-scope: standalone
+description: "Contract-first API design — REST and GraphQL conventions, error handling, and versioning. Use when designing new API endpoints, reviewing API structure, establishing API conventions, or defining OpenAPI/GraphQL schemas."
 ---
 
 # API Design
-
-## When to Use
-
-Invoke this skill when designing new API endpoints, reviewing API structure, or establishing API conventions for a project.
 
 ## Core Principle: Contract First
 

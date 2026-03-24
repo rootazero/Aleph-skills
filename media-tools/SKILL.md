@@ -1,33 +1,9 @@
 ---
 name: media-tools
-description: Media processing — video, audio, image manipulation via ffmpeg
-emoji: "🎬"
-category: automation
-cli-wrapper: true
-requirements:
-  binaries:
-    - ffmpeg
-  platforms:
-    - macos
-    - linux
-  install:
-    - manager: brew
-      package: ffmpeg
-triggers:
-  - ffmpeg
-  - video
-  - audio
-  - convert video
-  - compress
-  - GIF
-  - thumbnail
+description: "Media processing — video, audio, and image manipulation via ffmpeg. Use for format conversion, compression, video clipping, merging, GIF creation, thumbnail extraction, audio extraction, metadata inspection, or any ffmpeg operation."
 ---
 
 # Media Processing (ffmpeg)
-
-## When to Use
-
-Invoke this skill for any video, audio, or image processing task: format conversion, compression, clipping, merging, GIF creation, thumbnail extraction, or metadata inspection.
 
 ## Prerequisites
 

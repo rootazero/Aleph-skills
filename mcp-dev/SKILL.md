@@ -1,14 +1,9 @@
 ---
 name: mcp-dev
-description: MCP Server development guide — agent-centric design, 4-phase workflow, Aleph extension integration
-scope: standalone
+description: "MCP Server development — agent-centric design, 4-phase workflow (research, implement, review, evaluate), and Aleph extension integration. Use when building MCP (Model Context Protocol) servers, designing tools for agent workflows, or creating Aleph plugins with MCP capability."
 ---
 
 # MCP Server Development
-
-## When to Use
-
-Invoke this skill when building MCP (Model Context Protocol) servers — the primary mechanism for extending Aleph's capabilities with external tools and integrations.
 
 ## Core Design Principles
 

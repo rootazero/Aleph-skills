@@ -1,14 +1,9 @@
 ---
 name: deploy
-description: Deployment lifecycle — containerization, release strategies, monitoring, rollback procedures
-scope: standalone
+description: "Deployment lifecycle — containerization, release strategies, monitoring, and rollback procedures. Use when containerizing applications, setting up deployment pipelines, writing Dockerfiles, planning release strategies (blue-green, canary), or handling rollbacks."
 ---
 
 # Deployment & Operations
-
-## When to Use
-
-Invoke this skill when containerizing applications, setting up deployment pipelines, planning release strategies, or handling rollbacks.
 
 ## Containerization
 

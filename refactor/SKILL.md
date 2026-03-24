@@ -1,14 +1,9 @@
 ---
 name: refactor
-description: Safe code refactoring — smell detection, technique selection, test-protected incremental changes
-scope: standalone
+description: "Safe code refactoring — smell detection, technique selection, and test-protected incremental changes. Use when code needs restructuring without changing external behavior. Always refactor separately from bug fixes and feature additions."
 ---
 
 # Code Refactoring
-
-## When to Use
-
-Invoke this skill when code needs restructuring without changing external behavior. Always refactor separately from bug fixes and feature additions.
 
 ## Prerequisites
 

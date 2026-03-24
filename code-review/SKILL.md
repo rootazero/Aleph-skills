@@ -1,14 +1,9 @@
 ---
 name: code-review
-description: Multi-dimensional code review with confidence-based filtering — security, logic, error handling
-scope: standalone
+description: "Multi-dimensional code review with confidence-based filtering — security, logic, and error handling. Use when reviewing code changes: pull requests, diffs, or files. Provides structured, prioritized review that surfaces high-confidence issues first."
 ---
 
 # Code Review
-
-## When to Use
-
-Invoke this skill when reviewing code changes — pull requests, diffs, or files. It provides a structured, prioritized review that surfaces high-confidence issues first.
 
 ## Review Protocol
 

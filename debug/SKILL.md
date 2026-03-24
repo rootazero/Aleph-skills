@@ -1,14 +1,9 @@
 ---
 name: debug
-description: Systematic debugging methodology — 7-step protocol with POE-aligned success contracts
-scope: standalone
+description: "Systematic debugging methodology — 7-step protocol with POE-aligned success contracts. Use when investigating bugs, unexpected behavior, test failures, or production incidents. Provides structured methodology that prevents random guessing and ensures reproducible fixes."
 ---
 
 # Systematic Debugging
-
-## When to Use
-
-Invoke this skill when investigating bugs, unexpected behavior, test failures, or production incidents. It provides a structured methodology that prevents random guessing and ensures reproducible fixes.
 
 ## Step 0: Define Success (POE — Principle)
 

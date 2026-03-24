@@ -1,14 +1,9 @@
 ---
 name: security
-description: Security audit — OWASP checklist, credential leak response, dependency scanning, input validation
-scope: standalone
+description: "Security audit — OWASP checklist, credential leak response, dependency scanning, and input validation. Use when reviewing code for security vulnerabilities, responding to credential leaks, scanning dependencies, or establishing security practices."
 ---
 
 # Security Audit
-
-## When to Use
-
-Invoke this skill when reviewing code for security vulnerabilities, responding to credential leaks, or establishing security practices for a project.
 
 ## OWASP Top 10 Checklist
 

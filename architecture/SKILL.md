@@ -1,14 +1,9 @@
 ---
 name: architecture
-description: System architecture design — pattern selection, dependency analysis, architecture visualization
-scope: standalone
+description: "System architecture design — pattern selection, dependency analysis, and architecture visualization. Use for system-level design decisions: monolith vs microservices, module boundaries, tech stack evaluation, or architecture diagramming."
 ---
 
 # System Architecture
-
-## When to Use
-
-Invoke this skill for system-level design decisions: choosing between monolith and microservices, designing module boundaries, evaluating tech stacks, or visualizing architecture.
 
 ## Architecture Decision Framework
 

@@ -1,14 +1,9 @@
 ---
 name: regex
-description: Practical regex cookbook — validation, parsing, replacement patterns across languages
-scope: standalone
+description: "Practical regex cookbook — validation, parsing, and replacement patterns across languages (JavaScript, Python, Rust). Use when writing, debugging, or optimizing regular expressions, validating input formats (email, URL, UUID, semver), parsing logs or structured text, or performing search-and-replace transformations."
 ---
 
 # Regular Expressions
-
-## When to Use
-
-Invoke this skill when writing, debugging, or optimizing regular expressions. It provides ready-to-use patterns organized by use case.
 
 ## Quick Reference
 

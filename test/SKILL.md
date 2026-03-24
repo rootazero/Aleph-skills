@@ -1,14 +1,9 @@
 ---
 name: test
-description: Unified testing workflow — TDD cycles, framework selection, test patterns across languages
-scope: standalone
+description: "Unified testing workflow — TDD cycles, framework selection, and test patterns across languages. Use when writing tests, setting up test infrastructure, running TDD cycles, analyzing test coverage, or choosing testing frameworks."
 ---
 
 # Testing & TDD
-
-## When to Use
-
-Invoke this skill when writing tests, setting up test infrastructure, running TDD cycles, or analyzing test coverage. It provides a unified approach across frameworks.
 
 ## Framework Detection
 
