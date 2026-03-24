@@ -137,12 +137,58 @@ structure templates, field definitions, and caveats you need.
 ## Common Workflows
 
 ### Add a generation provider (image/video/speech/audio)
-1. read_config_guide(topic="generation") for structure and URL rules
-2. Add [generation.providers.<name>] to config.toml
-   - base_url: use full URL for non-standard APIs (no auto-completion),
-     or standard base URL for OpenAI-compatible APIs (system auto-appends path)
-3. vault_store(action="store", key="gen:<name>", secret="<api_key>")
-4. Optionally set default_<type> = "<name>" in [generation]
+
+**CRITICAL**: Use the correct `provider_type` value. Supported types:
+- Image: `openai_image`, `dalle`, `stability`, `stability_image`, `sdxl`, `midjourney`, `mj`, `google_imagen`, `imagen`, `replicate`
+- Video: `t8star_veo`, `google_veo`, `veo`
+- Speech: `openai_tts`, `tts`, `elevenlabs`
+- Audio: `openai_compat`
+
+**URL rules**:
+- Standard URL (e.g., `https://api.openai.com` or `https://api.openai.com/v1`): system auto-appends path
+- Full URL (e.g., `https://ai.t8star.cn/v2/videos/generations`): used as-is, no auto-completion
+
+**Steps**:
+1. read_config_guide(topic="generation") for full structure reference
+2. Store API key FIRST: `vault_store(action="store", key="gen:<name>", secret="<api_key>")`
+3. Add provider config to `~/.aleph/config.toml` under `[generation]` section using bash:
+
+```bash
+# IMPORTANT: Insert INSIDE the [generation] section, BEFORE the next top-level section
+# Use cat with heredoc to append at correct position
+```
+
+**Video provider example** (T8Star Veo):
+```toml
+[generation.providers.T8StarVideo]
+provider_type = "t8star_veo"
+base_url = "https://ai.t8star.cn/v2/videos/generations"
+models = ["veo3.1-pro-4k"]
+capabilities = ["video"]
+enabled = true
+timeout_seconds = 300
+color = "#808080"
+```
+
+**Image provider example** (OpenAI DALL-E):
+```toml
+[generation.providers.openai-dalle]
+provider_type = "openai_image"
+base_url = "https://api.openai.com/v1"
+models = ["dall-e-3"]
+capabilities = ["image"]
+enabled = true
+```
+
+4. Set as default: add `default_video = "T8StarVideo"` (or `default_image`, `default_speech`) in `[generation]`
+5. Verify config is valid: `cat ~/.aleph/config.toml | head -5` (config auto-reloads)
+
+**Common mistakes to avoid**:
+- Do NOT use `provider = "..."` — the correct field is `provider_type = "..."`
+- Do NOT use `type = "video"` — the correct field is `capabilities = ["video"]`
+- Do NOT put `[generation.providers.X]` after `[tools]` or other top-level sections
+- Do NOT write API keys in config — always use vault_store
+- The `provider_type` must be one of the supported values listed above
 
 ### Add an LLM provider
 1. read_config_guide(topic="providers") for structure
@@ -157,3 +203,49 @@ structure templates, field definitions, and caveats you need.
 ### Install a plugin
 1. aleph plugin marketplace update
 2. aleph plugin install <name>
+
+## Custom Provider Notes
+
+Many users use third-party API proxies (DMX, OpenRouter, custom relay servers) that are
+OpenAI-compatible but host various models (Claude, Gemini, Llama, etc.).
+
+### LLM Custom Provider
+```toml
+[providers.MyProxy]
+protocol = "openai"                    # Always "openai" for OpenAI-compatible proxies
+base_url = "https://my-proxy.com/v1"   # Include /v1 if the proxy expects it
+models = ["claude-sonnet-4-6", "gpt-4o"]  # Models available through the proxy
+enabled = true
+verified = false                       # Will be set to true after successful test
+timeout_seconds = 300
+```
+- `protocol` is always `"openai"` for any OpenAI-compatible endpoint (including OpenRouter, DMX, etc.)
+- `base_url` should be the base URL the proxy expects (some need `/v1`, some don't)
+- Store API key: `vault_store(action="store", key="provider:MyProxy", secret="sk-xxx")`
+
+### Generation Custom Provider
+```toml
+[generation.providers.MyVideoProvider]
+provider_type = "t8star_veo"           # Must be a supported type (see list above)
+base_url = "https://my-api.com/v2/videos/generations"  # Full URL = no auto-completion
+models = ["model-name"]
+capabilities = ["video"]               # One of: image, video, speech, audio
+enabled = true
+timeout_seconds = 300
+```
+- `provider_type` MUST be one of the supported values — there is no generic "custom" type
+- For video via OpenAI-compatible proxy, use `t8star_veo` or `google_veo`
+- For image via OpenAI-compatible proxy, use `openai_image`
+- For speech via OpenAI-compatible proxy, use `openai_tts`
+- `capabilities` determines what generation type this provider handles
+- Store API key: `vault_store(action="store", key="gen:MyVideoProvider", secret="sk-xxx")`
+
+## Config File Editing Rules
+
+When editing `~/.aleph/config.toml`:
+
+1. **Read the file first** to understand the current structure
+2. **TOML section ordering matters**: `[generation.providers.X]` must be inside the `[generation]` block, before any other top-level section like `[tools]`, `[group_chat]`, etc.
+3. **Use bash to edit**: `file_ops` cannot access `~/.aleph/config.toml` (protected). Use bash with careful sed/heredoc commands.
+4. **Verify after edit**: read the file back and check TOML validity
+5. **Config auto-reloads**: no restart needed for config.toml changes (fswatch 500ms debounce)
