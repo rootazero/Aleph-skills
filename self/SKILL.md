@@ -14,12 +14,22 @@ and manage your own configuration and workspace.
 
 ## ⚠️ Critical Rules (read before doing ANYTHING)
 
-1. **Be efficient with tool calls** — you have limited iterations. Do NOT waste calls on web_fetch, unnecessary reads, or exploratory actions. Go directly to the task.
-2. **API keys are PII-filtered** — the user's message may have the API key replaced with `[REDACTED]`. If so, ask the user to send it separately or use vault_store directly.
-3. **file_ops CANNOT access ~/.aleph/config.toml** — it's in denied_paths. Always use `bash` tool to read/write config.
-4. **Store API key FIRST, then edit config** — vault_store, then bash edit. Never write keys to config files.
-5. **Copy the exact TOML templates below** — do NOT invent field names. Wrong field names silently fail.
-6. **TOML section ordering** — `[generation.providers.X]` must be BEFORE `[group_chat]`, `[tools]`, etc. Insert at the correct position.
+### Allowed tools for self-management
+Only use these tools during configuration tasks:
+- `vault_store` — store/delete/list API keys in encrypted vault
+- `bash` — read/write config files, run system commands
+- `read_config_guide` — load detailed guide for a specific domain
+- `self_manage` — re-enter self-management mode (already active)
+
+Do NOT use `web_fetch`, `search`, `file_ops`, `image_generate`, or any other tool
+during configuration. They waste token budget and are irrelevant.
+
+### Other critical rules
+1. **API keys are PII-filtered** — the user's message may have the API key replaced with `[REDACTED]`. If so, ask the user to send the key via vault_store tool directly.
+2. **file_ops CANNOT access ~/.aleph/config.toml** — it's in denied_paths. Always use `bash` tool.
+3. **Store API key FIRST, then edit config** — vault_store, then bash. Never write keys to config files.
+4. **Copy the exact TOML templates below** — do NOT invent field names. Wrong field names silently fail.
+5. **TOML section ordering** — `[generation.providers.X]` must be BEFORE `[group_chat]`, `[tools]`, etc.
 
 ## Workspace Structure: ~/.aleph/
 
