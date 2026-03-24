@@ -246,7 +246,8 @@ color = "#808080"
 
 ## Config File Editing Rules
 
-1. **Always use `bash` tool** — `file_ops` cannot access `~/.aleph/config.toml` (protected path)
+1. **Generation providers need restart** — config.toml hot-reload updates the Config struct, but generation provider instances are only registered at startup. After adding/modifying a generation provider, tell the user: "Please restart Aleph for the new generation provider to take effect."
+2. **Always use `bash` tool** — `file_ops` cannot access `~/.aleph/config.toml` (protected path)
 2. **TOML section ordering matters**: subsections like `[generation.providers.X]` must appear
    after their parent `[generation]` and before the next top-level section
 3. **Use python3 for complex edits** — safer than sed for TOML manipulation
