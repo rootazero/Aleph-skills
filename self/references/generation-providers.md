@@ -136,14 +136,21 @@ vault_store(action="store", key="gen:<Name>", secret="<key>")
 
 **Step 2**: Find insertion point
 ```
-bash(grep -n '^\[generation\]\|^\[group_chat\]\|^\[tools\]\|^\[mcp\]' ~/.aleph/config.toml)
+bash(grep -n '^\[generation\]\|^\[group_chat\]\|^\[tools\]\|^\[mcp\]' "${ALEPH_HOME:-$HOME/.aleph}/config.toml")
 ```
 
 **Step 3**: Insert with python3
+
+The path is derived once, inside Python — `ALEPH_HOME` points *at* the `.aleph`
+directory (unset means `~/.aleph`), and Python's `open()` expands neither `~` nor
+`$HOME`, so do not shorten `CONFIG` to a literal path: a read would raise
+`FileNotFoundError` and a write would create a literal `./~/.aleph/` tree.
+
 ```
 bash(python3 -c "
-import re
-with open('$HOME/.aleph/config.toml', 'r') as f:
+import os, re
+CONFIG = os.path.join(os.path.expanduser(os.environ.get('ALEPH_HOME', '~/.aleph')), 'config.toml')
+with open(CONFIG, 'r') as f:
     content = f.read()
 new_section = '''
 [generation.providers.<NAME>]
@@ -162,7 +169,7 @@ if match:
     content = content[:pos] + new_section + '\n' + content[pos:]
 else:
     content += new_section
-with open('$HOME/.aleph/config.toml', 'w') as f:
+with open(CONFIG, 'w') as f:
     f.write(content)
 print('Done')
 ")
@@ -170,7 +177,7 @@ print('Done')
 
 **Step 4**: Verify
 ```
-bash(grep -A8 '<NAME>' ~/.aleph/config.toml)
+bash(grep -A8 '<NAME>' "${ALEPH_HOME:-$HOME/.aleph}/config.toml")
 ```
 
 Tell user: "Please restart Aleph for the new generation provider to take effect."

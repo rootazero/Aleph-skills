@@ -336,16 +336,27 @@ All top-level sections available in `config.toml`:
 
 ### For Complex Config Edits (via bash)
 
-1. Read current: `bash(cat ~/.aleph/config.toml)`
+**Config path — one spelling, both languages.** `ALEPH_HOME` points *at* the
+`.aleph` directory (it is not a parent to join `.aleph` onto); unset it means `~/.aleph`.
+
+- bash: `"${ALEPH_HOME:-$HOME/.aleph}/config.toml"`
+- python3: `os.path.join(os.path.expanduser(os.environ.get("ALEPH_HOME", "~/.aleph")), "config.toml")`
+  — do **not** shorten this to `open("~/.aleph/…")` or `open("$HOME/.aleph/…")`:
+  Python expands neither, so a read raises `FileNotFoundError` and a write
+  silently creates a literal `./~/.aleph/` tree in the cwd. And on a host with
+  `ALEPH_HOME` set, a hardcoded `~/.aleph` edits a file the daemon never reads.
+
+1. Read current: `bash(cat "${ALEPH_HOME:-$HOME/.aleph}/config.toml")`
 2. Edit with python3:
 ```python
-import toml
-config = toml.load(open("~/.aleph/config.toml"))
+import os, toml
+CONFIG = os.path.join(os.path.expanduser(os.environ.get("ALEPH_HOME", "~/.aleph")), "config.toml")
+config = toml.load(open(CONFIG))
 # modify config
-with open("~/.aleph/config.toml", "w") as f:
+with open(CONFIG, "w") as f:
     toml.dump(config, f)
 ```
-3. Verify: `bash(grep -A10 '\[providers.openai\]' ~/.aleph/config.toml)`
+3. Verify: `bash(grep -A10 '\[providers.openai\]' "${ALEPH_HOME:-$HOME/.aleph}/config.toml")`
 
 ---
 
