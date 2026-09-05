@@ -28,10 +28,12 @@ Sections should appear in this order to match the Config struct serialization:
 [general]
 [memory]
 [providers.*]
-[rules]
+[rules]                    # slash commands only; a regex without a `^/` prefix is inert
+                           # (warned at load, refused by routing_rules.create/.update)
 [behavior]
 [search]
-[fetch]                    # URL→markdown fetch providers for web_fetch
+[fetch]                    # URL→markdown fetch backends; NOT wired into web_fetch (BT-D-R4-22),
+                           # only the fetch_config.test connection test reads them
 [tools]
 [mcp]
 [unified_tools]

@@ -257,12 +257,12 @@ All top-level sections available in `config.toml`:
 | Section | Purpose | Key Fields |
 |---------|---------|-----------|
 | `general` | Core settings | `default_provider`, `fallback_providers`, `language`, `browser` |
-| `memory` | Cognitive memory | `enabled`, `embedding`, `curated`, `compression`, `dreaming` |
+| `memory` | Cognitive memory | `enabled`, `embedding`, `curated`, `dreaming` |
 | `providers.*` | LLM providers | `protocol`, `models`, `enabled`, `base_url` |
-| `rules` | Provider routing rules | `regex`, `provider`, `preferred_model`, `rule_type` |
-| `behavior` | Agent behavior tuning | `output_mode`, `typing_speed` (the only two fields) |
+| `rules` | Custom **slash commands only**, not provider routing: an entry whose `regex` starts with `^/` becomes a tool named after the command, and anything else is inert. See *Advanced: Slash-Command Rules* below before writing one. | `regex`, `system_prompt`, `is_builtin` |
+| `behavior` | Output rendering mode | `output_mode` (`typewriter` or `instant`; the only field `BehaviorConfig` declares) |
 | `search` | Search provider config | `enabled`, `default_provider`, `max_results`, `backends.*` (`provider_type`, `api_key`, `base_url`) |
-| `fetch` | URL→markdown fetch providers for `web_fetch` | `enabled`, `default_provider`, `fallback_providers`, `backends.*` |
+| `fetch` | URL→markdown fetch backends. **Not wired into `web_fetch` at runtime** (BT-D-R4-22: a provider resolves the URL from its own network position, so the SSRF DNS pin cannot be enforced) — `web_fetch` always uses the built-in pinned fetch, and a configured backend only triggers a one-time startup warning. The section is still read by the `fetch_config.test` connection-test RPC, so credentials here are testable but not used for real fetches. | `enabled`, `default_provider`, `fallback_providers`, `backends.*` |
 | `tools` | Built-in tools | `fs_enabled`, `shell_enabled`, `git_enabled`, `allowed_roots`, `allowed_commands`, `core`, `defer_mcp_tools` |
 | `mcp` | MCP servers | `enabled`, `external_servers` |
 | `unified_tools` | Unified tool facade | `enabled`, `native`, `mcp` (takes precedence over legacy `[tools]` + `[mcp]`) |
@@ -560,6 +560,52 @@ model = "gemini-2.5-flash"
 > `AgentInstanceConfig.tool_whitelist` (sourced from `agent.skills`), the persona
 > overlay is the workspace's `AGENTS.md`, and prompt caching is decided by the
 > protocol adapters with no dial at all.
+
+---
+
+## Advanced: Slash-Command Rules (`[[rules]]`)
+
+`[[rules]]` defines **custom slash commands**. Nothing else — keyword rules
+(2026-09-05) are retired: they were never wired to anything, and wiring them
+would be intent routing by rule engine, which R7/P8 forbids.
+
+```toml
+[[rules]]
+regex = "^/draw\\s+"        # MUST start with ^/ — this is what registration keys off
+provider = "gemini"         # required by validation (see below), read by nothing
+system_prompt = "Draw a picture based on the prompt"
+```
+
+A rule whose `regex` starts with `^/` and that is not `is_builtin` is registered
+by `register_custom_commands` as a tool named after the command, with
+`system_prompt` as both its description (truncated to 100 chars) and its routing
+prompt. A rule whose regex lacks the prefix is registered nowhere and does
+nothing.
+
+What happens to a non-`^/` rule now depends on how it arrives:
+
+| Path | Behaviour |
+|------|-----------|
+| Written via `routing_rules.create` / `routing_rules.update` | **Refused.** Both handlers call `reject_unregistrable`, which rejects a non-`^/` regex *and* any `rule_type` label other than `"command"` (a mislabelled `^/` rule would be listed to the Panel as "KEYWORD" — a wrong label reads as a fact). |
+| Already on disk (hand-edited `config.toml`) | **Warned, not rejected.** `Config::validate` names every inert rule at `warn!` with its 1-based index and regex, then returns `Ok` — the daemon still boots. Editing `config.toml` by `bash` bypasses the write-boundary refusal above, so this warning is the only signal you get. |
+| Panel rule editor | The rule-type selector is gone; the form writes `rule_type: None` and the type is derived from the regex. |
+
+> **The two predicates are not the same set.** *Registration* keys off the
+> regex (`RoutingRuleConfig::is_registered_command` — `^/` prefix). The
+> `provider` **requirement** in `Config::validate` still keys off the
+> operator's `rule_type` *label* (`is_command_rule` → `get_rule_type`, which
+> falls back to the regex only when the label is absent). So `provider` is
+> genuinely required — the file fails to load without it — but of a *different*
+> set than the one that gets registered: `rule_type = "keyword"` on a `^/`
+> regex is registered yet never provider-checked, and `rule_type = "command"`
+> on a plain regex is provider-checked yet reaches no code. That split is
+> deliberate: deriving the requirement from the regex would hard-fail configs
+> that boot today.
+
+`provider` is required and then read by nothing — no routing pass turns a
+rule's `provider` into a model choice. `preferred_model`, `strip_prefix`,
+`intent_type` and `icon` parse cleanly and are dropped. Source of truth:
+`src/config/types/routing.rs` module doc.
 
 ---
 
