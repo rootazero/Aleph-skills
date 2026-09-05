@@ -7,30 +7,26 @@
 3. Subsections must appear after parent and before next top-level section.
 4. Verify after edit: `grep -A10 'section' ~/.aleph/config.toml`
 5. Config auto-reloads (fswatch 500ms) — no restart needed except generation providers.
-6. Never write secrets to config.toml — use `vault_store`.
+6. Never write secrets to config.toml — use `vault_store`, then reference the
+   stored name with a `{{secret:NAME}}` placeholder.
 
 ## config.toml Section Order
 
 Sections should appear in this order to match the Config struct serialization:
 
 ```
-default_hotkey
 [general]
 [memory]
 [providers.*]
 [rules]
 [behavior]
 [search]
-[skills]
+[fetch]                    # URL→markdown fetch providers for web_fetch
 [tools]
 [mcp]
 [unified_tools]
 [tool_service]
 [sandbox]
-[smart_flow]
-[smart_matching]
-[dispatcher]
-[agent]                    # alias [cowork] for backward compatibility
 [policies]
 [generation]
   [generation.providers.*]
@@ -38,23 +34,19 @@ default_hotkey
   [generation.video_providers.*]
   [generation.speech_providers.*]
   [generation.audio_providers.*]
-[orchestrator]
-[subagent]
+[voice]                    # [voice.local] / [voice.streaming] / [voice.format]
 [route]                    # local-vs-cloud failover routing
 [group_chat]
 [cron]
 [heartbeat]
 [tasks_reaper]             # alias [task_reaper]
 [personas]
-[evolution]
-[media]
 [privacy]
 [security]
+  [security.ssrf]          # foreign-owned: honoured by a raw-TOML bridge in load.rs
 [ssrf]
-[profiles.*]
-[secret_providers.*]
-[secrets.*]
-[secrets_config]
+[profiles.*]               # model + [profiles.*.smart_recall] only
+[secrets_config]           # virtual_keys, custom_leak_patterns
 [prompt]
 [channels.*]
 [a2a]
@@ -62,18 +54,41 @@ default_hotkey
 [execution]
 [agents]
 [bindings]
+[session]                  # dm_scope = "per-peer" (default) | "main"
 [plugin_marketplaces.*]
 [stop_hooks]
 [guardrails]
 [stability]
 [fallback_provider]
 [context_budget]
+[strategy]                 # strategic planner for /goal, /loop, /workflow
+[moa]                      # Mixture-of-Agents advisory presets
+[team_dispatcher]
+[team_broadcast]
+[team_messages]
 [resume]
 [projects]                 # project-workspace filesystem scope
-[desktop]                  # desktop daemon consumers (§7.6)
-  [desktop.presence]       # host presence broadcast (on @30s default)
-  [desktop.mic_level]      # mic-level meter (opt-in, off by default)
+[desktop]                  # allow_global_pointer only (§7.6)
 ```
+
+`[gateway]` is also a valid, load-bearing section of this same file — it is read
+by `GatewayConfig::load_default` (`src/gateway/config.rs`), not by `Config`, so it
+has no fixed position in the serialization order above. Because `Config` has no
+`gateway` field, `self_config` cannot read or patch that path — edit `[gateway]`
+with the `bash` tool instead.
+
+**Retired — never write these.** `[agent]` / `[cowork]`, `[secret_providers]`,
+`[desktop.presence]`, `[desktop.mic_level]`, `profiles.*.system_prompt`,
+`profiles.*.tools`, `profiles.*.cache_strategy`, `agents.*.system_prompt`,
+`memory.compound_ingest.replan_on_hash_conflict`,
+`memory.compound_ingest.failure_cooldown_seconds`. They are listed in
+`src/config/dead_keys.rs` as tolerated-and-retired: an existing file keeps parsing
+(no `deny_unknown_fields`), the loader logs each at `info!` asking the operator to
+delete the line, and none of them reach any code.
+
+Anything **not** listed above and **not** in that retired list is reported dead —
+`Config::load_from_file` warns and `doctor`'s `core/config-parse` raises a Warning
+naming the path.
 
 ## Process Management (CRITICAL)
 

@@ -206,18 +206,16 @@ change until restart.
 | `generation` | Generation provider config |
 | `cron` | Scheduled tasks |
 | `profiles` | Workspace profiles (Anti-Gravity Architecture) |
-| `secret_providers` | Secret backend configs (1Password, Bitwarden, local vault) |
-| `secrets` | Logical secret name → provider mappings |
-| `secrets_config` | Top-level secret subsystem settings |
+| `secrets_config` | Secret subsystem settings (virtual-key aliases, custom leak patterns) |
 | `execution` | Agent timeout and iteration limits |
-| `orchestrator` | Orchestrator guard limits (rounds, tool calls, tokens) |
 | `stop_hooks` | Pre-stop shell command hooks |
 | `policies` | Behavioral policies (tool safety, retry, intent, etc.) |
 | `sandbox` | Sandbox runtime config (workspace root, timeout, output cap) |
 | `agents` | Agent definitions and global defaults |
-| `agent` (alias `cowork`) | Agent task orchestration settings |
 | `bindings` | Channel → Agent routing bindings |
 | `route` | Local-vs-cloud routing mode (`mode`, `allow_cloud_escalation`). Prefer the `route_status` action to view; patch this path to change. |
+| `session` | DM scope (`dm_scope` = `per-peer` / `main` / `per-channel-peer`) |
+| `gateway` | Gateway server (host, port, TLS, origins) — read by `GatewayConfig`, not by `Config` |
 
 ---
 
@@ -258,60 +256,72 @@ All top-level sections available in `config.toml`:
 
 | Section | Purpose | Key Fields |
 |---------|---------|-----------|
-| `general` | Core settings | `default_provider`, `language`, `log_level` |
-| `memory` | Cognitive memory | `enabled`, `embedding`, `auto_save` |
+| `general` | Core settings | `default_provider`, `fallback_providers`, `language`, `browser` |
+| `memory` | Cognitive memory | `enabled`, `embedding`, `curated`, `compression`, `dreaming` |
 | `providers.*` | LLM providers | `protocol`, `models`, `enabled`, `base_url` |
-| `rules` | Provider routing rules | `pattern`, `provider`, `priority` |
-| `behavior` | Agent behavior tuning | `auto_confirm`, `streaming`, `verbosity` |
-| `search` | Search provider config | `provider`, `api_key_ref`, `max_results` |
-| `skills` | Skill system | `enabled`, `skills_dir`, `auto_match_enabled` |
-| `tools` | Built-in tools | `enabled`, `timeout_seconds`, `per_tool_overrides` |
+| `rules` | Provider routing rules | `regex`, `provider`, `preferred_model`, `rule_type` |
+| `behavior` | Agent behavior tuning | `output_mode`, `typing_speed` (the only two fields) |
+| `search` | Search provider config | `enabled`, `default_provider`, `max_results`, `backends.*` (`provider_type`, `api_key`, `base_url`) |
+| `fetch` | URL→markdown fetch providers for `web_fetch` | `enabled`, `default_provider`, `fallback_providers`, `backends.*` |
+| `tools` | Built-in tools | `fs_enabled`, `shell_enabled`, `git_enabled`, `allowed_roots`, `allowed_commands`, `core`, `defer_mcp_tools` |
 | `mcp` | MCP servers | `enabled`, `external_servers` |
-| `unified_tools` | Unified tool facade | `enabled`, `registry_path` (takes precedence over legacy `[tools]` + `[mcp]`) |
-| `tool_service` | Tool service runtime | `default_timeout`, `max_concurrent` |
-| `sandbox` | Execution sandbox | `workspace_root`, `timeout_seconds`, `output_cap_bytes` |
-| `smart_flow` | ⚠️ Legacy — parsed but inert (no runtime consumer) | `enabled`, `context_window_target` |
-| `smart_matching` | ⚠️ Legacy — parsed but inert (no runtime consumer) | `enabled`, `threshold` |
-| `dispatcher` | ⚠️ Legacy — dissolved in the Dispatcher-dissolution refactor (R7); parsed but inert | `enabled`, `fallback_policy` |
-| `agent` (alias `cowork`) | Agent task orchestration | `enabled`, `max_subagents`, `default_timeout` |
-| `policies` | Behavioral policies | `tool_safety`, `retry`, `intent`, `memory.compression` |
+| `unified_tools` | Unified tool facade | `enabled`, `native`, `mcp` (takes precedence over legacy `[tools]` + `[mcp]`) |
+| `tool_service` | Tool service runtime | `default_timeout_seconds`, `per_tool_seconds`, `parallel_tool_concurrency` |
+| `sandbox` | Execution sandbox | `enabled`, `workspace_root`, `default_timeout_seconds`, `max_output_bytes`, `command_policy` (hard floor — no session knob overrides it) |
+| `policies` | Behavioral policies | `tool_permissions`, `exec_tier`, `spend`, `mode`, `memory.compression`, `web_fetch` |
 | `generation` | Media generation | `providers`, `image_providers`, `video_providers`, `speech_providers`, `audio_providers` |
-| `orchestrator` | Three-Layer Orchestrator | `guards.max_rounds`, `guards.max_tool_calls`, `guards.max_tokens` |
-| `subagent` | ⚠️ Legacy — parsed but inert (no runtime consumer) | `enabled`, `max_depth`, `inherit_context` |
+| `voice` | Local voice — BYO OpenAI-compatible STT/TTS (`[voice.local]`, `[voice.streaming]`, `[voice.format]`) | `local`, `streaming`, `format`, `llm_provider`, `llm_model` |
 | `route` | Local-vs-cloud failover routing (LIVE — shapes the failover chain by endpoint tier) | `mode` (`auto`/`always_local`/`always_cloud`), `allow_cloud_escalation`, `local_provider`, `cloud_provider` |
-| `group_chat` | Multi-agent chat | `enabled`, `personas`, `rotation_strategy` |
-| `cron` | Scheduler runtime (jobs themselves are DB-backed, managed via the `cron_manage` tool) | `enabled`, `db_path`, `check_interval_secs`, `max_concurrent_jobs`, `job_timeout_secs` |
-| `heartbeat` | Health monitoring | `enabled`, `interval_seconds`, `endpoints` |
-| `personas` | Preset persona definitions | `name`, `system_prompt`, `model` |
-| `evolution` | ⚠️ Legacy — parsed but inert (no runtime consumer) | `enabled`, `auto_generate`, `threshold` |
-| `media` | ⚠️ Legacy — parsed but inert (no runtime consumer) | `enabled`, `providers`, `cache_ttl` |
-| `privacy` | PII filtering | `enabled`, `redaction_level`, `allowed_entities` |
-| `security` | Shell security | `shell.enable_custom_patterns`, `shell.custom_blocked` |
+| `group_chat` | Multi-agent chat | `max_rounds`, `max_personas_per_session`, `history_window_rounds`, `coordinator_visible` |
+| `cron` | Scheduler runtime (jobs themselves are DB-backed, managed via the `cron_manage` tool) | `enabled`, `db_path`, `check_interval_secs`, `max_concurrent_agents`, `job_timeout_secs` |
+| `heartbeat` | Health monitoring | `enabled`, `tick_interval_secs`, `max_concurrent`, `job_timeout_secs`, `dedup` |
+| `personas` | Preset persona definitions | `id`, `name`, `system_prompt`, `provider`, `model` |
+| `privacy` | PII filtering | `pii_filtering`, `email`, `phone`, `api_key`, `custom_rules`, `exclude_providers` |
+| `security` | Shell security (flat table — there is **no** `[security.shell]` sub-table) | `enable_custom_patterns`, `custom_blocked`, `custom_danger`, `mask_patterns` |
 | `ssrf` | SSRF protection | `enabled`, `allowed_hosts`, `blocked_hosts` |
-| `profiles.*` | Workspace profiles | `model`, `tools`, `system_prompt`, `temperature` |
-| `secret_providers.*` | Secret backends | `type` (`local_vault`, `1password`, `bitwarden`) |
-| `secrets.*` | Secret mappings | `provider`, `ref`, `sensitivity`, `ttl` |
-| `secrets_config` | Secret defaults | `default_provider`, `virtual_keys` |
-| `prompt` | Prompt customization | `extra_files`, `inject_order` |
+| `profiles.*` | Workspace profiles | `model`, `smart_recall.*` (the only two knobs `ProfileConfig` has) |
+| `secrets_config` | Secret subsystem | `virtual_keys`, `custom_leak_patterns` |
+| `prompt` | Prompt customization | `extra_files` (the only field) |
 | `channels.*` | Channel instances | Platform-specific fields (Telegram, Discord, etc.) |
-| `a2a` | A2A protocol | `enabled`, `endpoint`, `auth` |
-| `acp` | ACP harness | `enabled`, `mode`, `timeout_seconds` |
+| `a2a` | A2A protocol | `enabled`, `server`, `agents`, `health_check_interval_secs` |
+| `acp` | ACP harness | `enabled`, `adapters` (the only two fields) |
 | `execution` | Execution engine | `default_timeout_secs` (default 48h), `max_iterations` (default 1000), `prompt_mode`, `progress_push` |
 | `agents` | Agent definitions | `defaults`, `list` (array of agent definitions) |
-| `bindings` | Route bindings | `channel`, `pattern`, `agent_id` |
+| `bindings` | Route bindings | `match`, `agent_id` (the only two fields) |
+| `session` | DM scope — `main` collapses every channel's DM into one agent session | `dm_scope` (`per-peer` default / `main` / `per-channel-peer`), `identity_links` |
 | `plugin_marketplaces.*` | Plugin sources | `source`, `type` (`github` or `local`) |
 | `stop_hooks` | Stop hooks | `name`, `command`, `timeout_secs` |
 | `guardrails` | PII/secret hard-filter switch | `enabled` |
 | `stability` | P0 rescue knobs (stall watchdog, failure cap, per-turn timeout) | `stall_timeout_secs`, `consecutive_failure_cap`, `turn_timeout_secs` |
 | `fallback_provider` | Provider failover chain | `chain`, `provider` |
 | `context_budget` | Mid-run context-window compaction | `enabled`, `token_budget`, `warning_threshold`, `critical_threshold` |
+| `strategy` | One-shot strategic planner welded into the cacheable prompt prefix for `/goal`, `/loop`, `/workflow` (defaults on when the section is present) | `enabled`, `planner_model`, `plan_naked_loop`, `plan_team` |
+| `moa` | Mixture-of-Agents continuous-advisory presets | `default_preset`, `save_traces`, `presets.*` |
+| `team_dispatcher` | Team dispatcher tunables | `max_concurrent`, `lock_ttl_secs`, `task_timeout_secs`, `zombie_ttl_secs`, `max_per_owner`, `default_max_retries`, `retry_backoff_base_secs` |
+| `team_broadcast` | Group-chat broadcast storm guards | `max_chain_depth`, `max_fanout_width`, `max_total_activations`, `transcript_token_budget`, `member_run_timeout_secs` |
+| `team_messages` | Team thread-escalation nudge | `thread_message_threshold`, `escalation_enabled` |
 | `resume` | Boot-scan auto-resume of interrupted runs | `enabled`, `max_age_secs`, `max_attempts`, `max_concurrent` |
-| `projects` | Project workspace registry (per-directory skills/memory/plugins/hooks scoping) | `enabled`, project roots |
-| `tasks_reaper` (alias `task_reaper`) | Background reaper for stale/orphaned tasks | `enabled`, sweep interval |
+| `projects` | Project-selection filesystem scope — the only roots a paired client may traverse | `allowed_roots` (the only field) |
+| `tasks_reaper` (alias `task_reaper`) | Background reaper for stale/orphaned tasks | `enabled`, `interval_secs`, `dedup_retention_secs` |
+| `desktop` | Desktop daemon-consumer policy | `allow_global_pointer` (default `false`) |
+| `gateway` | Gateway server — **foreign-owned**: read by `GatewayConfig::load_default` out of this same file, so `Config` has no `gateway` field by design. Fully live. | `host`, `port`, `max_connections`, `max_connections_per_ip`, `allowed_origins`, `tls`, `rate_limit`, `ping_interval_secs` |
 
-> **Top-level scalar**: `default_hotkey` (string) sits at the config root, not inside any section.
+> **Foreign-owned nested key**: `[security.ssrf]` is also live — it is honoured by a
+> raw-TOML bridge (`Config::apply_security_ssrf_overrides`) even though
+> `ShellSecurityConfig` has no `ssrf` field. Distinct from the top-level `[ssrf]` row above.
 >
-> **Important**: `[agent]` (task orchestration) and `[agents]` (agent definitions) are **different sections**. Do not confuse them.
+> **Retired tables — do not write them.** `[agent]` / `[cowork]` (2026-08-17) and
+> `[secret_providers]` (2026-09-05) are listed in `src/config/dead_keys.rs` as
+> *tolerated-and-retired*: an old file keeps parsing and booting, the loader logs
+> them at `info!` telling the operator to delete the line, and they reach no code.
+> Also retired: `profiles.*.system_prompt`, `profiles.*.tools`,
+> `profiles.*.cache_strategy`, `agents.*.system_prompt`, `[desktop.presence]`,
+> `[desktop.mic_level]`, `memory.compound_ingest.replan_on_hash_conflict`,
+> `memory.compound_ingest.failure_cooldown_seconds`.
+>
+> Any section **not** in the table above and **not** in that retired list is neither
+> parsed nor tolerated: `Config::load_from_file` warns and `doctor`'s
+> `core/config-parse` raises a Warning naming the path as reaching no code.
 
 ---
 
@@ -445,74 +455,100 @@ embedding_batch_size = 32
 
 ## Advanced: Secrets Management
 
-Beyond `vault_store`, Aleph supports external secret providers for team/enterprise use.
+There is exactly **one** secret backend: the built-in encrypted local vault
+(`~/.aleph/data/secrets.vault`, AES-256-GCM with the Gateway shared token as
+master key). It is **not** configurable — there is no `[secret_providers]`
+table and no `[secrets.*]` mapping table. Do not write one — an old config
+carrying them still loads (unknown top-level tables are tolerated), but the
+table is flagged as retired and resolves nothing.
 
-### Secret Providers
+### Storing and Listing
 
-```toml
-[secrets_config]
-default_provider = "local"
+`vault_store` is the tool surface — see the Vault section above. The
+equivalent CLI (useful when the daemon is stopped) is:
 
-[secret_providers.local]
-type = "local_vault"
-
-[secret_providers.op]
-type = "1password"
-account = "my.1password.com"
-service_account_token_env = "OP_SERVICE_ACCOUNT_TOKEN"
+```
+aleph-server secret init                  # create the vault (idempotent)
+aleph-server secret set <NAME>            # prompts for the value (hidden)
+aleph-server secret set <NAME> --value …  # non-interactive
+aleph-server secret list                  # names only, never values
+aleph-server secret delete <NAME>         # requires the server to be stopped
+aleph-server secret verify <NAME>         # presence + byte length only
+aleph-server secret providers             # prints the one built-in: local / local_vault
 ```
 
-Supported provider types: `local_vault`, `1password`, `bitwarden`.
+Secret names accept ASCII letters, digits, `_`, `-`, `.` and `:`, up to 128
+characters. Values are never returned by `list`, `verify`, or any RPC.
 
-### Secret Mappings
+### Referencing a Secret from Config
 
-Map logical names to provider references:
+Use a `{{secret:NAME}}` placeholder anywhere a config or prompt string is
+rendered. It is resolved host-side, immediately before the outbound request,
+and the resolved value is fingerprinted for leak detection — it is never
+persisted back into `config.toml`.
 
 ```toml
-[secrets.OPENAI_API_KEY]
-provider = "op"
-ref = "OpenAI/api-key"
-sensitivity = "high"
-ttl = 1800
+[providers.openai]
+api_key = "{{secret:ai:openai}}"
 ```
+
+An unknown name is an error, not an empty string — a missing secret fails the
+render rather than silently sending a blank credential.
+
+### `[secrets_config]`
+
+The only secrets section that exists. Both fields are optional.
 
 | Field | Description |
 |-------|-------------|
-| `provider` | Name of the secret provider (must match a `secret_providers` key) |
-| `ref` | Provider-specific reference path (e.g., `"OpenAI/api-key"` for 1Password) |
-| `sensitivity` | `"standard"` or `"high"` — affects cache duration and redaction |
-| `ttl` | Cache time-to-live in seconds (default: 3600) |
+| `virtual_keys` | Alias → real secret name map. `{{secret:<alias>}}` resolves through it; names with no alias pass through unchanged. |
+| `custom_leak_patterns` | Extra regex patterns for outbound/inbound leak scanning, additive to the built-ins. Each entry is `{ name, pattern }`; an invalid regex is logged and skipped. |
+
+```toml
+[secrets_config.virtual_keys]
+"openai" = "OPENAI_API_KEY"
+
+[[secrets_config.custom_leak_patterns]]
+name = "Internal API Token"
+pattern = "internal-[a-z0-9]{32}"
+```
 
 ---
 
 ## Advanced: Workspace Profiles
 
-Profiles (Anti-Gravity Architecture) define the "physics" of a workspace — model binding, tool whitelist, and system prompt. They are static templates; workspaces are runtime instances.
+Profiles (Anti-Gravity Architecture) bind a class of workspaces to a model and to
+cross-workspace memory-recall behaviour. They are static templates; workspaces are
+runtime instances. `ProfileConfig` has exactly **two** fields — everything else a
+profile used to accept was retired because it reached no code.
 
 ```toml
 [profiles.coding]
-description = "Rust/Python development"
 model = "claude-sonnet-4"
-tools = ["git_*", "fs_*", "terminal", "search"]
-system_prompt = "You are a senior engineer..."
-temperature = 0.2
-history_limit = 50
+
+[profiles.coding.smart_recall]
+enabled = true
+score_threshold = 0.60
+min_primary_results = 2
+max_cross_results = 3
 
 [profiles.creative]
-description = "Creative writing"
 model = "gemini-2.5-flash"
-tools = ["search", "fs_read"]
-temperature = 0.9
 ```
 
 | Field | Description |
 |-------|-------------|
-| `model` | Bound AI model (overrides general default) |
-| `tools` | Tool whitelist using glob patterns (e.g., `git_*`, `fs_*`) |
-| `system_prompt` | Additional system prompt appended to base |
-| `temperature` | Generation temperature (0.0–2.0) |
-| `max_tokens` | Max response tokens |
-| `history_limit` | Max messages to retain in context |
+| `model` | Bound AI model, resolved by `agent_resolver::resolve_one` (overrides the general default) |
+| `smart_recall` | Cross-workspace memory recall, plumbed into the `memory_search` per-agent handle: `enabled` (default `true`), `score_threshold` (default `0.60`), `min_primary_results` (default `2`), `max_cross_results` (default `3`) |
+
+> **Do not write these into a profile.** `tools`, `system_prompt` and
+> `cache_strategy` are tolerated-and-retired (`dead_keys.rs` logs them at `info!`);
+> `description`, `temperature`, `max_tokens` and `history_limit` were retired in the
+> 2026-08-17 wire audit (config-004) and are not even tolerated — they are **reported
+> dead**. The live equivalents live elsewhere: the tool gate is
+> `AgentInstanceConfig.tool_whitelist` (sourced from `agent.skills`), the persona
+> overlay is the workspace's `AGENTS.md`, and prompt caching is decided by the
+> protocol adapters with no dial at all.
 
 ---
 
