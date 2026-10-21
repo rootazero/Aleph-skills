@@ -47,7 +47,6 @@ Sections should appear in this order to match the Config struct serialization:
   [generation.speech_providers.*]
   [generation.audio_providers.*]
 [voice]                    # [voice.local] / [voice.streaming] / [voice.format]
-[route]                    # local-vs-cloud failover routing
 [group_chat]
 [cron]
 [heartbeat]
@@ -74,7 +73,6 @@ Sections should appear in this order to match the Config struct serialization:
 [fallback_provider]
 [context_budget]
 [strategy]                 # strategic planner for /goal, /loop, /workflow
-[moa]                      # Mixture-of-Agents advisory presets
 [team_dispatcher]
 [team_broadcast]
 [team_messages]
@@ -90,6 +88,7 @@ has no fixed position in the serialization order above. Because `Config` has no
 with the `bash` tool instead.
 
 **Retired — never write these.** `[agent]` / `[cowork]`, `[secret_providers]`,
+`[moa]` / `[route]` / `[routing]` (2026-10-19, semantic routing removed),
 `[desktop.presence]`, `[desktop.mic_level]`, `profiles.*.system_prompt`,
 `profiles.*.tools`, `profiles.*.cache_strategy`, `agents.*.system_prompt`,
 `memory.compound_ingest.replan_on_hash_conflict`,
