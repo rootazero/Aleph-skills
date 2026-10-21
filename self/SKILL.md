@@ -56,7 +56,7 @@ Structured access to identity files and config.toml with built-in validation and
 ### Actions
 
 > **Action values are snake_case** — the `action` field accepts `list_files`,
-> `read_file`, `write_file`, `read_config`, `update_config`, `route_status`.
+> `read_file`, `write_file`, `read_config`, `update_config`.
 > PascalCase spellings (e.g. `ListFiles`) fail deserialization.
 
 #### list_files
@@ -154,15 +154,6 @@ When `dry_run=true`, the response includes a `preview_message` in Chinese:
 }
 ```
 
-#### route_status
-Show the current local/cloud route decision (`mode` + `allow_cloud_escalation`).
-Read-only view; to *change* the route, patch `config_path="route"`.
-```
-self_config(action="route_status")
-self_config(action="update_config", config_path="route", config_value={"mode": "always_local"}, dry_run=false)
-```
-A `route` patch hot-applies to the live failover chain on the next prompt — no restart needed.
-
 ### Recommended Workflow
 
 ```
@@ -185,7 +176,7 @@ change until restart.
 
 | `kind` | Meaning | What to tell the user |
 |--------|---------|-----------------------|
-| `live` | Hot-swapped onto the running runtime (only `route` today) | Effective next prompt, no restart |
+| `live` | Hot-swapped onto the running runtime (`behavior`, `execution`, `search`, `policies.spend`, `policies.terminal`) | Effective next prompt, no restart |
 | `restart` | Saved, but runtime captured it at startup | **Tell the user to restart aleph-server** |
 | `inert` | Legacy section, no runtime consumer | Saved but changes nothing — confirm intent |
 
@@ -213,7 +204,6 @@ change until restart.
 | `sandbox` | Sandbox runtime config (workspace root, timeout, output cap) |
 | `agents` | Agent definitions and global defaults |
 | `bindings` | Channel → Agent routing bindings |
-| `route` | Local-vs-cloud routing mode (`mode`, `allow_cloud_escalation`). Prefer the `route_status` action to view; patch this path to change. |
 | `session` | DM scope (`dm_scope` = `per-peer` / `main` / `per-channel-peer`) |
 | `gateway` | Gateway server (host, port, TLS, origins) — read by `GatewayConfig`, not by `Config` |
 
@@ -271,7 +261,6 @@ All top-level sections available in `config.toml`:
 | `policies` | Behavioral policies | `tool_permissions`, `exec_tier`, `spend`, `mode`, `memory.compression`, `web_fetch` |
 | `generation` | Media generation | `providers`, `image_providers`, `video_providers`, `speech_providers`, `audio_providers` |
 | `voice` | Local voice — BYO OpenAI-compatible STT/TTS (`[voice.local]`, `[voice.streaming]`, `[voice.format]`) | `local`, `streaming`, `format`, `llm_provider`, `llm_model` |
-| `route` | Local-vs-cloud failover routing (LIVE — shapes the failover chain by endpoint tier) | `mode` (`auto`/`always_local`/`always_cloud`), `allow_cloud_escalation`, `local_provider`, `cloud_provider` |
 | `group_chat` | Multi-agent chat | `max_rounds`, `max_personas_per_session`, `history_window_rounds`, `coordinator_visible` |
 | `cron` | Scheduler runtime (jobs themselves are DB-backed, managed via the `cron_manage` tool) | `enabled`, `db_path`, `check_interval_secs`, `max_concurrent_agents`, `job_timeout_secs` |
 | `heartbeat` | Health monitoring | `enabled`, `tick_interval_secs`, `max_concurrent`, `job_timeout_secs`, `dedup` |
@@ -296,7 +285,6 @@ All top-level sections available in `config.toml`:
 | `fallback_provider` | Provider failover chain | `chain`, `provider` |
 | `context_budget` | Mid-run context-window compaction | `enabled`, `token_budget`, `warning_threshold`, `critical_threshold` |
 | `strategy` | One-shot strategic planner welded into the cacheable prompt prefix for `/goal`, `/loop`, `/workflow` (defaults on when the section is present) | `enabled`, `planner_model`, `plan_naked_loop`, `plan_team` |
-| `moa` | Mixture-of-Agents continuous-advisory presets | `default_preset`, `save_traces`, `presets.*` |
 | `team_dispatcher` | Team dispatcher tunables | `max_concurrent`, `lock_ttl_secs`, `task_timeout_secs`, `zombie_ttl_secs`, `max_per_owner`, `default_max_retries`, `retry_backoff_base_secs` |
 | `team_broadcast` | Group-chat broadcast storm guards | `max_chain_depth`, `max_fanout_width`, `max_total_activations`, `transcript_token_budget`, `member_run_timeout_secs` |
 | `team_messages` | Team thread-escalation nudge | `thread_message_threshold`, `escalation_enabled` |
@@ -311,7 +299,7 @@ All top-level sections available in `config.toml`:
 > `ShellSecurityConfig` has no `ssrf` field. Distinct from the top-level `[ssrf]` row above.
 >
 > **Retired tables — do not write them.** `[agent]` / `[cowork]` (2026-08-17) and
-> `[secret_providers]` (2026-09-05) are listed in `src/config/dead_keys.rs` as
+> `[secret_providers]` (2026-09-05), `[route]`, `[routing]`, and `[moa]` are listed in `src/config/dead_keys.rs` as
 > *tolerated-and-retired*: an old file keeps parsing and booting, the loader logs
 > them at `info!` telling the operator to delete the line, and they reach no code.
 > Also retired: `profiles.*.system_prompt`, `profiles.*.tools`,
