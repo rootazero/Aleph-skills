@@ -527,7 +527,6 @@ model = "claude-sonnet-4"
 
 [profiles.coding.smart_recall]
 enabled = true
-score_threshold = 0.60
 min_primary_results = 2
 max_cross_results = 3
 
@@ -538,10 +537,11 @@ model = "gemini-2.5-flash"
 | Field | Description |
 |-------|-------------|
 | `model` | Bound AI model, resolved by `agent_resolver::resolve_one` (overrides the general default) |
-| `smart_recall` | Cross-workspace memory recall, plumbed into the `memory_search` per-agent handle: `enabled` (default `true`), `score_threshold` (default `0.60`), `min_primary_results` (default `2`), `max_cross_results` (default `3`) |
+| `smart_recall` | Cross-workspace memory recall, plumbed into the `memory_search` per-agent handle: `enabled` (default `true`), `min_primary_results` (default `2`), `max_cross_results` (default `3`). Phase 2 fires when the primary result COUNT is below `min_primary_results` — there is no score knob |
 
-> **Do not write these into a profile.** `tools`, `system_prompt` and
-> `cache_strategy` are tolerated-and-retired (`dead_keys.rs` logs them at `info!`);
+> **Do not write these into a profile.** `tools`, `system_prompt`,
+> `cache_strategy` and `smart_recall.score_threshold` are tolerated-and-retired
+> (`dead_keys.rs` logs them at `info!`);
 > `description`, `temperature`, `max_tokens` and `history_limit` were retired in the
 > 2026-08-17 wire audit (config-004) and are not even tolerated — they are **reported
 > dead**. The live equivalents live elsewhere: the tool gate is
