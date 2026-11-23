@@ -72,7 +72,9 @@ Outer layers depend on inner layers, never the reverse.
 4 Nerves  = WebSocket + UDS/IPC + gRPC/NATS + JSON-RPC
 
 Redline: Core never imports platform-specific APIs.
-         UI logic lives in Leptos only, not in Tauri shell.
+         UI logic lives in Leptos only, not in the desktop host.
+         The host is dual-track: legacy Tauri (desktop/shell, still the
+         released build) and the forward NSH host (desktop/nsh-shell).
 ```
 
 ## Architecture Diagrams
